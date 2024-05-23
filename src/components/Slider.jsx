@@ -1,11 +1,14 @@
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import React, { useEffect, useRef } from 'react'
+import { useSelector } from "react-redux";
 import ReactSlider from "react-slick";
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs'
 import { Link } from "react-router-dom";
 
 const Slider = () => {
+    const setting = useSelector(state => state.ePaper.settings)
+    const color = setting?.epaper_sitetheme.primary_color_code;
     let sliderRef = useRef(null)
 
     useEffect(() => {
@@ -77,7 +80,7 @@ const Slider = () => {
             {[...Array(10)].map((item, i) => (
                 <Link key={i} to={`/pdf-view/${i}`} className="shadow hover:border-2 hover:border-black">
                     <img src={'https://sakfs.sitcdn.com/SAK/2024/05/18/hydFH_MAIN/5_01/73df1928_01_mr.jpg'} alt="slider_image" className={`w-full 'h-40' object-fill`} />
-                    <p className='text-center text-blue-800 bg-yellow-500 text-base font-semibold py-1'>{'Telangana'}</p>
+                    <p className={`text-center text-blue-800 ${color ? '' : 'bg-yellow-500'} text-base font-semibold py-1`} style={color ? { backgroundColor: color } : {}}>{'Telangana'}</p>
                 </Link>
             ))}
         </ReactSlider>

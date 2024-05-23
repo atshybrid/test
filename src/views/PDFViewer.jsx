@@ -2,12 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TwitterShareButton, XIcon, EmailShareButton, EmailIcon, WhatsappShareButton, WhatsappIcon } from "react-share";
-import { BsHouse, BsCalendar, BsGeoAlt, BsCrop, BsZoomOut, BsZoomIn, BsFullscreen, BsDownload, BsChevronLeft, BsChevronRight, BsGridFill, BsX, BsCopy, BsCloudArrowDown } from "react-icons/bs";
-import { MinimalButton, SpecialZoomLevel, Worker, Viewer, ViewMode } from '@react-pdf-viewer/core';
+import { BsHouse, BsCalendar, BsGeoAlt, BsCrop, BsZoomOut, BsZoomIn, BsFullscreen, BsDownload, BsChevronLeft, BsChevronRight, BsGridFill, BsX, BsCopy, BsCloudArrowDown, BsList } from "react-icons/bs";
+import { MinimalButton, SpecialZoomLevel, Worker, Viewer, ViewMode, ScrollMode } from '@react-pdf-viewer/core';
 import { toolbarPlugin } from '@react-pdf-viewer/toolbar';
 import { SelectionMode } from '@react-pdf-viewer/selection-mode';
 import { ThumbnailDirection, thumbnailPlugin } from '@react-pdf-viewer/thumbnail';
-import { NextIcon, pageNavigationPlugin, PreviousIcon } from '@react-pdf-viewer/page-navigation';
+import { scrollModePlugin } from '@react-pdf-viewer/scroll-mode';
+import { pageNavigationPlugin } from '@react-pdf-viewer/page-navigation';
 import { fetchSingleEpaper } from '../redux/util/ePaperUtils';
 import ePaperPDF from '../assets/pdf/ePaper.pdf';
 
@@ -18,6 +19,10 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 import '@react-pdf-viewer/toolbar/lib/styles/index.css';
 import '@react-pdf-viewer/thumbnail/lib/styles/index.css';
 import '@react-pdf-viewer/full-screen/lib/styles/index.css';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import SideBar from '../components/SideBar';
+import { disableScrollPlugin } from '../utils/helper';
 
 const shareUrl = 'http://github.com';
 const title = 'GitHub';
@@ -25,8 +30,11 @@ const title = 'GitHub';
 const PDFViewer = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
+    const settings = useSelector(state => state.ePaper.settings)
+    const color = settings?.epaper_sitetheme.primary_color_code;
     // const singleFeed = useSelector(state => state.ePaper.singleFeed)
 
+    const [sideMenuOpen, setSideMenuOpen] = useState(false);
     const [viewThubnails, setViewThubnails] = useState(false);
     const [cropper, setCropper] = useState(null);
     const [cropArea, setCropArea] = useState({});
@@ -39,7 +47,7 @@ const PDFViewer = () => {
     }, [dispatch])
 
     const pageNavigationPluginInstance = pageNavigationPlugin();
-    const { jumpToNextPage, jumpToPreviousPage } = pageNavigationPluginInstance;
+    const { jumpToNextPage, jumpToPreviousPage, jumpToPage } = pageNavigationPluginInstance;
 
     const thumbnailPluginInstance = thumbnailPlugin();
     const { Thumbnails } = thumbnailPluginInstance;
@@ -51,6 +59,12 @@ const PDFViewer = () => {
     });
 
     const { Toolbar } = toolbarPluginInstance;
+
+    const disableScrollPluginInstance = disableScrollPlugin();
+
+    const scrollModePluginInstance = scrollModePlugin();
+
+    scrollModePluginInstance.switchScrollMode(ScrollMode.Horizontal);
 
     const handleThumbnailChange = () => {
         setViewThubnails(!viewThubnails);
@@ -71,8 +85,41 @@ const PDFViewer = () => {
         }
     };
 
+    const navlinks = [
+        {
+            label: "All Editions",
+            link: () => navigate('/')
+        },
+        {
+            label: "Home",
+            link: () => jumpToPage(0)
+        },
+        {
+            label: "Crop and Share",
+            link: () => null
+        },
+        {
+            label: "Contact Us",
+            link: () => null
+        },
+        {
+            label: "About Us",
+            link: () => null
+        },
+        {
+            label: "Terms & Conditions",
+            link: () => null
+        },
+        {
+            label: "Privacy Policy",
+            link: () => null
+        }
+    ];
+
     return (
         <>
+            <SideBar data={navlinks} isVisible={sideMenuOpen} onSideMenuClose={() => setSideMenuOpen(false)} onBackdropPress={() => setSideMenuOpen(false)} />
+            <Header onMenuPress={() => setSideMenuOpen(true)} onCropPress={() => setCropper(!cropper)} />
             <Toolbar>
                 {(props) => {
                     const {
@@ -88,11 +135,10 @@ const PDFViewer = () => {
                         Download
                     } = props;
                     return (
-                        <div className='flex bg-white px-4 py-2 items-center justify-between'>
+                        <div className='hidden xl:flex padding-x py-2 items-center justify-between'>
                             <div className='flex items-center gap-6 cursor-pointer'>
-                                <button onClick={() => navigate(-1)}>
-                                    <BsHouse />
-                                </button>
+                                <BsList onClick={() => setSideMenuOpen(true)} />
+                                <BsHouse onClick={() => navigate(-1)} />
                                 <GoToFirstPage>
                                     {(props) => (
                                         <button onClick={props.onClick}>
@@ -172,18 +218,18 @@ const PDFViewer = () => {
                     <Thumbnails thumbnailDirection={ThumbnailDirection.Horizontal} />
                 </div>
             )}
-            <div className='relative h-screen'>
-                <div className='absolute z-10 top-[40%] left-2 origin-center -rotate-90'>
+            <div className='max-sm:h-[640px] h-screen w-full xl:w-[70%] xl:mx-auto relative'>
+                <div className={`size-8 ${color ? '' : 'bg-yellow-500'} absolute z-10 top-1/2 left-8`} style={color ? { backgroundColor: color } : {}}>
                     <MinimalButton onClick={jumpToPreviousPage}>
-                        <PreviousIcon />
+                        <BsChevronLeft className='text-white' />
                     </MinimalButton>
                 </div>
                 {cropper && (
                     <>
                         <Cropper
                             ref={cropperRef}
-                            src="https://raw.githubusercontent.com/roadmanfong/react-cropper/master/example/img/child.jpg"
-                            style={{ height: "100%", width: "100%" }}
+                            src={ePaperPDF}
+                            style={{ height: "100%", width: "100%", position: 'absolute', zIndex: 50, top: 0, left: 0 }}
                             autoCrop={true}
                             guides={true}
                             modal={true}
@@ -218,17 +264,21 @@ const PDFViewer = () => {
                 <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
                     <Viewer
                         fileUrl={ePaperPDF}
-                        defaultScale={SpecialZoomLevel.ActualSize}
+                        defaultScale={SpecialZoomLevel.PageWidth}
                         viewMode={ViewMode.SinglePage}
-                        plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, toolbarPluginInstance]}
+                        plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, toolbarPluginInstance, scrollModePluginInstance, disableScrollPluginInstance]}
                         ref={viewerRef}
                     />
                 </Worker>
-                <div className='absolute z-10 top-[40%] right-2 origin-center -rotate-90'>
+
+                <div className={`size-8 ${color ? '' : 'bg-yellow-500'} absolute z-10 top-1/2 right-8`} style={color ? { backgroundColor: color } : {}}>
                     <MinimalButton onClick={jumpToNextPage}>
-                        <NextIcon />
+                        <BsChevronRight className='text-white' />
                     </MinimalButton>
                 </div>
+            </div>
+            <div className="flex xl:hidden bg-gray-600">
+                <Thumbnails thumbnailDirection={ThumbnailDirection.Horizontal} />
             </div>
         </>
     );

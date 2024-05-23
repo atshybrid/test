@@ -8,6 +8,10 @@ const Navbar = ({ data }) => {
         setIsOpen(!isOpen);
     };
 
+    if (data?.length == 0) {
+        return null;
+    }
+
     return (
         <nav className="bg-blue-700 border-gray-200 p-4">
             <div className="max-w-screen-xl flex flex-wrap items-center">
@@ -24,7 +28,7 @@ const Navbar = ({ data }) => {
                         <li>
                             <button onClick={toggleDropdown} class="flex items-center justify-between w-full py-2 px-3 text-white rounded hover:text-gray-100">
                                 Dropdown
-                                <BsChevronDown class='text-white ml-1' />
+                                <BsChevronDown className='text-white ml-1' />
                             </button>
                             {isOpen && (
                                 <div class="absolute z-10 font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44">

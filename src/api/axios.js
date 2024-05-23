@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = "http://epaper.prashnaayudham.com:8000";
+const baseURL = "http://epaper.dialereasy.in:8000";
 
 function fetchData(url) {
     const instance = axios.create();
