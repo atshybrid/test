@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TwitterShareButton, XIcon, EmailShareButton, EmailIcon, WhatsappShareButton, WhatsappIcon } from "react-share";
@@ -23,6 +24,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import SideBar from '../components/SideBar';
 import { disableScrollPlugin } from '../utils/helper';
+import ModalDatePicker from '../components/ModalDatePicker';
 
 const shareUrl = 'http://github.com';
 const title = 'GitHub';
@@ -34,6 +36,8 @@ const PDFViewer = () => {
     const color = settings?.epaper_sitetheme.primary_color_code;
     // const singleFeed = useSelector(state => state.ePaper.singleFeed)
 
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(Date.now());
     const [sideMenuOpen, setSideMenuOpen] = useState(false);
     const [viewThubnails, setViewThubnails] = useState(false);
     const [cropper, setCropper] = useState(null);
@@ -45,6 +49,20 @@ const PDFViewer = () => {
     useEffect(() => {
         // dispatch(fetchSingleEpaper(id));
     }, [dispatch])
+
+    const openModal = () => {
+        setModalIsOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
+
+    const handleDateChange = (date) => {
+        console.log(date);
+        setSelectedDate(date);
+        closeModal();
+    };
 
     const pageNavigationPluginInstance = pageNavigationPlugin();
     const { jumpToNextPage, jumpToPreviousPage, jumpToPage } = pageNavigationPluginInstance;
@@ -95,6 +113,10 @@ const PDFViewer = () => {
             link: () => jumpToPage(0)
         },
         {
+            label: "Change Date",
+            link: () => openModal()
+        },
+        {
             label: "Crop and Share",
             link: () => null
         },
@@ -118,8 +140,9 @@ const PDFViewer = () => {
 
     return (
         <>
+            <ModalDatePicker isModalOpen={modalIsOpen} onModalClose={closeModal} selectedDate={selectedDate} onChangeDate={handleDateChange} />
             <SideBar data={navlinks} isVisible={sideMenuOpen} onSideMenuClose={() => setSideMenuOpen(false)} onBackdropPress={() => setSideMenuOpen(false)} />
-            <Header onMenuPress={() => setSideMenuOpen(true)} onCropPress={() => setCropper(!cropper)} />
+            <Header onMenuPress={() => setSideMenuOpen(true)} onCropPress={() => { }} />
             <Toolbar>
                 {(props) => {
                     const {
@@ -146,8 +169,8 @@ const PDFViewer = () => {
                                         </button>
                                     )}
                                 </GoToFirstPage>
-                                <button className='flex items-center'>
-                                    <p className='mr-2'>April 15, 2024</p>
+                                <button className='flex items-center' onClick={openModal}>
+                                    <p className='mr-2'>{moment(selectedDate).format('LL')}</p>
                                     <BsCalendar />
                                 </button>
                                 <button className='flex items-center'>
@@ -169,7 +192,7 @@ const PDFViewer = () => {
                                         )}
                                     </GoToNextPage>
                                 </div>
-                                <button className='flex items-center' onClick={() => setCropper(!cropper)}>
+                                <button className='flex items-center' onClick={() => { }}>
                                     <BsCrop />
                                     <p className='ml-2'>Crop&Share</p>
                                 </button>
@@ -270,7 +293,6 @@ const PDFViewer = () => {
                         ref={viewerRef}
                     />
                 </Worker>
-
                 <div className={`size-8 ${color ? '' : 'bg-yellow-500'} absolute z-10 top-1/2 right-8`} style={color ? { backgroundColor: color } : {}}>
                     <MinimalButton onClick={jumpToNextPage}>
                         <BsChevronRight className='text-white' />

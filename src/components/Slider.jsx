@@ -8,8 +8,10 @@ import { Link } from "react-router-dom";
 
 const Slider = () => {
     const setting = useSelector(state => state.ePaper.settings)
-    const color = setting?.epaper_sitetheme.primary_color_code;
+    const color = setting?.epaper_sitetheme;
     let sliderRef = useRef(null)
+
+    console.log("Color ==>", color?.primary_color_code);
 
     useEffect(() => {
         sliderRef.slickPlay();
@@ -78,9 +80,9 @@ const Slider = () => {
     return (
         <ReactSlider ref={slider => (sliderRef = slider)} {...settings} className="flex items-center">
             {[...Array(10)].map((item, i) => (
-                <Link key={i} to={`/pdf-view/${i}`} className="shadow hover:border-2 hover:border-black">
+                <Link key={i} to={`/pdf-view/${i}`} className="shadow border-2 border-slate-300 hover:border-black">
                     <img src={'https://sakfs.sitcdn.com/SAK/2024/05/18/hydFH_MAIN/5_01/73df1928_01_mr.jpg'} alt="slider_image" className={`w-full 'h-40' object-fill`} />
-                    <p className={`text-center text-blue-800 ${color ? '' : 'bg-yellow-500'} text-base font-semibold py-1`} style={color ? { backgroundColor: color } : {}}>{'Telangana'}</p>
+                    <p className={`text-center ${color?.primary_color_code ? '' : 'text-blue-800'} ${color?.secondary_color_code ? '' : 'bg-yellow-500'} text-base font-bold py-1`} style={{ backgroundColor: color?.secondary_color_code ? color?.secondary_color_code : undefined, color: color?.primary_color_code ? color?.primary_color_code : undefined }}>{'Telangana'}</p>
                 </Link>
             ))}
         </ReactSlider>
