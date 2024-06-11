@@ -19,7 +19,7 @@
     "@react-pdf-viewer/toolbar": "^3.12.0",
     "@react-pdf/renderer": "^3.4.4",
     "@reduxjs/toolkit": "^2.2.5",
-    "axios": "^1.6.8",
+    "axios": "^1.7.1",
     "moment": "^2.30.1",
     "react": "^18.2.0",
     "react-cropper": "^2.3.3",
